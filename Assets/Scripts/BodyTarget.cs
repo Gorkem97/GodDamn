@@ -4,14 +4,13 @@ using UnityEngine;
 
 public class BodyTarget : MonoBehaviour
 {
-    public Vector2[] attackDamageAndRange;
-    Vector2 initiatorDamageRange;
-    float intentionalAttackRange = 0;
-    float intentionalAttackDamage = 0;
+    Vector2 DamageRange;
     Vector3 kiki;
     public GameObject target;
     GameObject TheOne;
     GameObject player;
+
+    public float DamageEnchance = 1;
 
     Coroutine co;
     Animator adam;
@@ -35,26 +34,6 @@ public class BodyTarget : MonoBehaviour
         {
             adam.SetBool("Ataking", false);
         }
-        if (this.adam.GetCurrentAnimatorStateInfo(0).IsName("Attack1"))
-        {
-            initiatorDamageRange = attackDamageAndRange[1];
-        }
-        if (this.adam.GetCurrentAnimatorStateInfo(0).IsName("Attack2"))
-        {
-            initiatorDamageRange = attackDamageAndRange[2];
-
-        }
-        if (this.adam.GetCurrentAnimatorStateInfo(0).IsName("Attack3"))
-        {
-            initiatorDamageRange = attackDamageAndRange[3];
-
-        }
-        if (this.adam.GetCurrentAnimatorStateInfo(0).IsName("idle") || this.adam.GetCurrentAnimatorStateInfo(0).IsName("walk"))
-        {
-            initiatorDamageRange = attackDamageAndRange[0];
-        }
-        intentionalAttackDamage = initiatorDamageRange.x;
-        intentionalAttackRange = initiatorDamageRange.y;
     }
     private void OnTriggerStay(Collider other)
     {
@@ -67,10 +46,14 @@ public class BodyTarget : MonoBehaviour
                 TheOne = other.gameObject;
                 target.transform.position = TheOne.transform.position;
             }
-            if (Mathf.Abs(thisfar.x) <= intentionalAttackRange)
+            if (Mathf.Abs(thisfar.x) <= DamageRange.y)
             {
-                other.GetComponent<EnemyBehaviour>().HealthGo(intentionalAttackDamage);
+                GameObject.Find("Slash").GetComponent<AudioSource>().Play();
+                other.GetComponent<EnemyBehaviour>().HealthGo(DamageRange.x*DamageEnchance);
+                other.GetComponent<EnemyBehaviour>().OnAttack();
+                TimeScaler(0.01f, 0.2f);
             }
+            DamageRange = new Vector2(0, 0);
         }
     }
     private void OnTriggerExit(Collider other)
@@ -99,7 +82,20 @@ public class BodyTarget : MonoBehaviour
     }
     public void AttackStats(float range,float damage)
     {
+        DamageRange = new Vector2(damage, range);
+    }
 
+    void TimeScaler(float timeScaling, float TimeSequance)
+    {
+        Time.timeScale = timeScaling;
+        Time.fixedDeltaTime = Time.timeScale * 0.02f;
+        StartCoroutine(TimeWait(timeScaling, TimeSequance));
+    }
+    IEnumerator TimeWait(float scaling, float sequance)
+    {
+        yield return new WaitForSeconds(scaling * sequance);
+        Time.timeScale = 1;
+        Time.fixedDeltaTime = Time.timeScale * 0.02f;
     }
 }
 

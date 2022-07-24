@@ -40,6 +40,8 @@ public class walk : MonoBehaviour
     Vector3 walkRoute;
     bool hareketmi = false;
 
+    float range=0;
+    float damage=0;
     public float rollSpeed;
     bool rolling;
     void Start()
@@ -57,7 +59,12 @@ public class walk : MonoBehaviour
     void Update()
     {
         Health += 4 * Time.deltaTime;
-
+        if (damage>0)
+        {
+            AttackSequance.AttackStats(range, damage);
+            damage = 0;
+            range = 0;
+        }
 
         if (CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("draw") || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack1") || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack2") 
             || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack3") || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("roll"))
@@ -203,9 +210,13 @@ public class walk : MonoBehaviour
         Physics.IgnoreCollision(SlideIgnore.GetComponent<Collider>(), GetComponent<Collider>(), false);
         rolling = false;
     }
-    public void kDamageStart(float range, float damage)
+    public void AttackDamage(float a)
     {
-        AttackSequance.AttackStats(range,damage);
+        damage = a;
+    }
+    public void AttackRange(float a)
+    {
+        range = a;
     }
 
 }
