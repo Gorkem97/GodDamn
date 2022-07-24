@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 public class walk : MonoBehaviour
 {
     CharacterController controller;
-    public SwordAttack AttackSequance;
+    public BodyTarget AttackSequance;
     public float Health = 100;
 
     [Header("Gravity and Jump")]
@@ -32,6 +32,8 @@ public class walk : MonoBehaviour
     private InputAction fire;
     private InputAction jump;
     private InputAction slide;
+
+    GameObject SlideIgnore;
 
     Animator CharacterAnimator;
     Vector2 moveDirection = Vector2.zero;
@@ -99,10 +101,10 @@ public class walk : MonoBehaviour
     }
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        Debug.Log("allah");
         if (rolling && hit.gameObject.tag == "Enemy")
         {
-            Physics.IgnoreCollision(hit.gameObject.GetComponent<Collider>(), GetComponent<Collider>());
+            SlideIgnore = hit.gameObject;
+            Physics.IgnoreCollision(SlideIgnore.GetComponent<Collider>(), GetComponent<Collider>());
         }
 
     }
@@ -195,9 +197,15 @@ public class walk : MonoBehaviour
     {
         rolling = true;
         CharacterAnimator.SetBool("roll",true);
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(0.4f);
         CharacterAnimator.SetBool("roll", false);
+        yield return new WaitForSeconds(0.4f);
+        Physics.IgnoreCollision(SlideIgnore.GetComponent<Collider>(), GetComponent<Collider>(), false);
         rolling = false;
+    }
+    public void kDamageStart(float range, float damage)
+    {
+        AttackSequance.AttackStats(range,damage);
     }
 
 }
