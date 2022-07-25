@@ -44,9 +44,13 @@ public class walk : MonoBehaviour
     float damage=0;
     public float rollSpeed;
     bool rolling;
+    public GameObject bit;
+
+    Quaternion rotationknow;
     void Start()
     {
         CharacterAnimator = this.gameObject.GetComponent<Animator>();
+        SlideIgnore = GameObject.Find("EmptyCollider");
     }
     private void Awake()
     {
@@ -58,7 +62,7 @@ public class walk : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Health += 4 * Time.deltaTime;
+        //Health += 4 * Time.deltaTime;
         if (damage>0)
         {
             AttackSequance.AttackStats(range, damage);
@@ -80,13 +84,20 @@ public class walk : MonoBehaviour
         if (Health >= 100)
         {
             Health = 100;
+            GameObject.Find("HealthBar").GetComponent<Slider>().value = 1;
         }
-        if (Health<1)
+        if (Health<=0)
         {
             Health = 0;
+            GameObject.Find("HealthBar").GetComponent<Slider>().value = 0;
+            hareketmi = false;
+            bit.SetActive(true);
+        }
+        else
+        {
+            GameObject.Find("HealthBar").GetComponent<Slider>().value = Health / 100;
         }
 
-        GameObject.Find("HealthBar").GetComponent<Slider>().value = Health / 100;
 
         RaycastHit hit;
         Ray GroundLay = new Ray(transform.position, Vector3.down);
@@ -176,7 +187,6 @@ public class walk : MonoBehaviour
     private void Fire(InputAction.CallbackContext context)
     {
         AttackSequance.Attack(CharacterAnimator);
-        Health -= 10;
     }
     private void Jump(InputAction.CallbackContext context)
     {
@@ -195,20 +205,22 @@ public class walk : MonoBehaviour
     }
     private void Slide(InputAction.CallbackContext context)
     {
-        if (CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("walk"))
+        if (CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("walk") || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("idle"))
         {
-            StartCoroutine(Slide());
+            StartCoroutine(Sliding());
         }
     }
-    IEnumerator Slide()
+    IEnumerator Sliding()
     {
+        rotationknow = transform.rotation;
         rolling = true;
         CharacterAnimator.SetBool("roll",true);
         yield return new WaitForSeconds(0.4f);
         CharacterAnimator.SetBool("roll", false);
         yield return new WaitForSeconds(0.4f);
-        Physics.IgnoreCollision(SlideIgnore.GetComponent<Collider>(), GetComponent<Collider>(), false);
         rolling = false;
+        Physics.IgnoreCollision(SlideIgnore.GetComponent<Collider>(), GetComponent<Collider>(), false);
+        transform.rotation = rotationknow;
     }
     public void AttackDamage(float a)
     {
@@ -218,6 +230,13 @@ public class walk : MonoBehaviour
     {
         range = a;
     }
-
+    public void TakeDamage(float Nooo)
+    {
+        if (!rolling)
+        {
+            Health -= Nooo;
+            GameObject.Find("Slash").GetComponent<AudioSource>().Play();
+        }
+    }
 }
 

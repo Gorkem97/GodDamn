@@ -6,13 +6,16 @@ using UnityEngine.UI;
 public class EnemyBehaviour : MonoBehaviour
 {
     public Transform Player;
+    public GameObject bit;
     public float goBac = 100;
-    float EnemyCurrentHealth;
-    public float EnemyMaxHealth = 100;
+    public float EnemyCurrentHealth;
+    public float EnemyMaxHealth = 200;
     public GameObject HealthBar;
     Animator EnemyAnimation;
     Rigidbody rb;
     Vector3 drag;
+
+    public bool bekle =false;
     void Start()
     {
         EnemyAnimation = GetComponent<Animator>();
@@ -23,26 +26,36 @@ public class EnemyBehaviour : MonoBehaviour
     {
         HealthBar.transform.rotation = Quaternion.LookRotation(Camera.main.transform.position);
         HealthBar.GetComponent<Slider>().value = EnemyCurrentHealth / EnemyMaxHealth;
-        if (Player.position.x < transform.position.x)
+
+        if (this.EnemyAnimation.GetCurrentAnimatorStateInfo(0).IsName("cut"))
         {
-            drag = new Vector3(-90,0, 0).normalized;
-            Quaternion rotation = Quaternion.LookRotation(drag);
-            transform.rotation = rotation;
+            if (Player.position.x < transform.position.x)
+            {
+                drag = new Vector3(-90, 0, 0).normalized;
+                Quaternion rotation = Quaternion.LookRotation(drag);
+                transform.rotation = rotation;
+            }
+            if (Player.position.x > transform.position.x)
+            {
+                drag = new Vector3(90, 0, 0).normalized;
+                Quaternion rotation = Quaternion.LookRotation(drag);
+                transform.rotation = rotation;
+            }
         }
-        if (Player.position.x > transform.position.x)
+        if (Mathf.Abs(Player.position.x - transform.position.x) <4 && !bekle)
         {
-            drag = new Vector3(90, 0, 0).normalized;
-            Quaternion rotation = Quaternion.LookRotation(drag);
-            transform.rotation = rotation;
+            StartCoroutine(Vuruyongm());
         }
-        
-        Vector3 direction = drag;
-        float turnSmoothVelocity = 60;
-        if (direction.magnitude > 0)
+
+        if (EnemyCurrentHealth<=0)
         {
-            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
-            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, 10f);
-            transform.rotation = Quaternion.Euler(0, angle, 0);
+            bit.SetActive(true);
+            HealthBar.GetComponent<Slider>().value = 0;
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            HealthBar.GetComponent<Slider>().value = EnemyCurrentHealth / EnemyMaxHealth;
         }
     }
     public void OnAttack()
@@ -53,10 +66,19 @@ public class EnemyBehaviour : MonoBehaviour
     public void HealthGo(float range)
     {
         EnemyCurrentHealth -= range;
-        if (EnemyCurrentHealth<=0)
+    }
+    IEnumerator Vuruyongm()
+    {
+        EnemyAnimation.SetTrigger("vur");
+        bekle = true;
+        yield return new WaitForSeconds(3);
+        bekle = false;
+    }
+    public void DealDamage()
+    {
+        if (Mathf.Abs(Player.position.x - transform.position.x) < 3)
         {
-            EnemyCurrentHealth = 0.001f;
-            Debug.Log("oldu");
+            Player.GetComponent<walk>().TakeDamage(30);
         }
     }
 }
