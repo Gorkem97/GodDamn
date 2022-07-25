@@ -11,11 +11,11 @@ public class walk : MonoBehaviour
     public float Health = 100;
 
     [Header("Gravity and Jump")]
-    public float GravityScale;
-    public float GravitationalSpeed;
-    public float JumpForce;
+    float GravityScale = 0.1f;
+    float GravitationalSpeed = 5;
+    float JumpForce = 10;
     public bool isWalking;
-    public float raycastDistance = 0.2f;
+    float raycastDistance = 0.08f;
     bool waitingJump;
     [Space(5)]
 
