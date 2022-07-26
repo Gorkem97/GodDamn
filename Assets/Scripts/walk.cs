@@ -80,10 +80,6 @@ public class walk : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!isBlocking)
-        {
-            isParry = false;
-        }
         if (!ParyParticle.GetComponent<ParticleSystem>().IsAlive())
         {
             ParyParticle.transform.position = transform.position + transform.forward + new Vector3(0, 1.6f, 0);
