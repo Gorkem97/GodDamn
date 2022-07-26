@@ -9,7 +9,7 @@ public class EnemyBehaviour : MonoBehaviour
     public GameObject bit;
     public float goBac = 100;
     public float EnemyCurrentHealth;
-    public float EnemyMaxHealth = 200;
+    public float EnemyMaxHealth = 100;
     public GameObject HealthBar;
     Animator EnemyAnimation;
     Rigidbody rb;
@@ -49,8 +49,9 @@ public class EnemyBehaviour : MonoBehaviour
 
         if (EnemyCurrentHealth<=0)
         {
-            bit.SetActive(true);
             HealthBar.GetComponent<Slider>().value = 0;
+            GameObject.Find("AttackAndCam").GetComponent<BodyTarget>().TheOne = GameObject.Find("AttackAndCam");
+            Player.GetComponent<walk>().TakeDamage(-70);
             Destroy(this.gameObject);
         }
         else
@@ -71,7 +72,7 @@ public class EnemyBehaviour : MonoBehaviour
     {
         EnemyAnimation.SetTrigger("vur");
         bekle = true;
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(1.5f);
         bekle = false;
     }
     public void DealDamage()

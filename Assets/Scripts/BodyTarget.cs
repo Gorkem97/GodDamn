@@ -7,7 +7,7 @@ public class BodyTarget : MonoBehaviour
     Vector2 DamageRange;
     Vector3 kiki;
     public GameObject target;
-    GameObject TheOne;
+    public GameObject TheOne;
     GameObject player;
 
     public float DamageEnchance = 1;
