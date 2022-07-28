@@ -10,6 +10,7 @@ public class EnemyBehaviour : MonoBehaviour
     public float goBac = 100;
     public float EnemyCurrentHealth;
     public float EnemyMaxHealth = 100;
+    public bool yokosunmu = false;
     public GameObject HealthBar;
     Animator EnemyAnimation;
     Rigidbody rb;
@@ -24,6 +25,10 @@ public class EnemyBehaviour : MonoBehaviour
     }
     void Update()
     {
+        if (yokosunmu)
+        {
+            StartCoroutine(Destiny());
+        }
         HealthBar.transform.rotation = Quaternion.LookRotation(Camera.main.transform.position);
         HealthBar.GetComponent<Slider>().value = EnemyCurrentHealth / EnemyMaxHealth;
 
@@ -50,7 +55,7 @@ public class EnemyBehaviour : MonoBehaviour
         if (EnemyCurrentHealth<=0)
         {
             HealthBar.GetComponent<Slider>().value = 0;
-            GameObject.Find("AttackAndCam").GetComponent<BodyTarget>().TheOne = GameObject.Find("AttackAndCam");
+            GameObject.Find("ALLAH").GetComponent<fÝNDaNDtERMÝNATE>().TheOne = GameObject.Find("ALLAH");
             Player.GetComponent<walk>().TakeDamage(-70);
             Destroy(this.gameObject);
         }
@@ -67,6 +72,7 @@ public class EnemyBehaviour : MonoBehaviour
     public void HealthGo(float range)
     {
         EnemyCurrentHealth -= range;
+        EnemyAnimation.SetTrigger("OuchStand");
     }
     IEnumerator Vuruyongm()
     {
@@ -81,5 +87,10 @@ public class EnemyBehaviour : MonoBehaviour
         {
             Player.GetComponent<walk>().TakeDamage(30);
         }
+    }
+    IEnumerator Destiny()
+    {
+        yield return new WaitForSeconds(0.1f);
+        Destroy(this.gameObject);
     }
 }

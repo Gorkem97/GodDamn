@@ -11,6 +11,8 @@ public class walk : MonoBehaviour
 
     [Header("Gravity and Jump")]
     public float GravityScale = 0.1f;
+    public float GravityHolder;
+    bool GravityPull = true;
     public float GravitationalSpeed = 5;
     public float JumpForce = 10;
     bool isWalking;
@@ -54,8 +56,8 @@ public class walk : MonoBehaviour
 
 
     [Header("Block/Parry")]
-    bool isBlocking= false;
-    bool isParry = false;
+    public bool isBlocking= false;
+    public bool isParry = false;
     GameObject ParyParticle;
     Transform ParryLit;
     [Space(5)]
@@ -65,6 +67,7 @@ public class walk : MonoBehaviour
     Quaternion rotationknow;
     void Start()
     {
+        GravityHolder = GravityScale;
         CharacterAnimator = this.gameObject.GetComponent<Animator>();
         SlideIgnore = GameObject.Find("EmptyCollider");
         ParyParticle = GameObject.Find("ParryParticle");
@@ -77,7 +80,6 @@ public class walk : MonoBehaviour
         StartCoroutine(IdleController());
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (!ParyParticle.GetComponent<ParticleSystem>().IsAlive())
@@ -92,7 +94,8 @@ public class walk : MonoBehaviour
         }
 
         if (CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("draw") || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack1") || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack2") 
-            || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack3") || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("roll") || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("blok"))
+            || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack3") || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("roll") || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("blok") 
+            || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("Great Sword Impact"))
         {
             hareketmi = false;
         }
@@ -118,6 +121,11 @@ public class walk : MonoBehaviour
         {
             GameObject.Find("HealthBar").GetComponent<Slider>().value = Health / 100;
         }
+        if (GravitationalSpeed>=0 && GravityPull)
+        {
+            GravityScale = GravityScale*8/10;
+            GravityPull = false;
+        }
 
 
         RaycastHit hit;
@@ -128,8 +136,10 @@ public class walk : MonoBehaviour
             if (hit.collider.tag == "Ground" && !waitingJump)
             {
                 isWalking = true;
+                GravityPull = true;
                 CharacterAnimator.SetBool("yerdemi", true);
                 GravitationalSpeed = 0.2f;
+                GravityScale = GravityHolder;
             }
         }
         else
@@ -158,12 +168,11 @@ public class walk : MonoBehaviour
     private void FixedUpdate()
     {
 
-        Health += 80 * Time.fixedDeltaTime;
+        Health -= 8 * Time.fixedDeltaTime;
         if (hareketmi)
         {
             moveDirection = move.ReadValue<Vector2>();
             walkRoute = new Vector3(moveDirection.x, 0, 0);
-
             Vector3 direction = walkRoute.normalized;
             if (direction.magnitude > 0)
             {
@@ -230,9 +239,7 @@ public class walk : MonoBehaviour
             CharacterAnimator.SetTrigger("jump");
             CharacterAnimator.SetBool("yerdemi", false);
             GravitationalSpeed = -JumpForce;
-            controller.Move(new Vector3(0, 1, 0) * 0.3f);
-            
-        }
+            controller.Move(new Vector3(0, 1, 0) * 0.3f);        }
     }
     private void Slide(InputAction.CallbackContext context)
     {
@@ -281,12 +288,12 @@ public class walk : MonoBehaviour
                 {
                     Health -= Nooo;
                     GameObject.Find("Slash").GetComponent<AudioSource>().Play();
+                    //CharacterAnimator.SetTrigger("OuchStand");
                 }
                 else
                 {
                     Health -= Nooo / 2;
                     GameObject.Find("Block").GetComponent<AudioSource>().Play();
-
                 }
             }
             if (isParry)

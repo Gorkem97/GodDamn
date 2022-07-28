@@ -5,9 +5,6 @@ using UnityEngine;
 public class BodyTarget : MonoBehaviour
 {
     Vector2 DamageRange;
-    Vector3 kiki;
-    public GameObject target;
-    public GameObject TheOne;
     GameObject player;
 
     public float DamageEnchance = 1;
@@ -18,14 +15,12 @@ public class BodyTarget : MonoBehaviour
     void Start()
     {
         player = GameObject.Find("Player");
-        adam = player.GetComponent<Animator>();
-        kiki = new Vector3(1000, 0, 0);
         co = StartCoroutine(PlaceHolder());
+        adam = player.GetComponent<Animator>();
     }
 
     void Update()
     {
-        target.transform.position = new Vector3(TheOne.transform.position.x, TheOne.transform.position.y + 1.6f, TheOne.transform.position.z);
         if (AttackStart)
         {
             adam.SetBool("Ataking", true);
@@ -40,28 +35,16 @@ public class BodyTarget : MonoBehaviour
         if (other.tag == "Enemy")
         {
             Vector3 thisfar = other.transform.position - transform.position;
-            if (other.gameObject == TheOne || Mathf.Abs(thisfar.x) < Mathf.Abs(kiki.x))
+            if (Mathf.Abs(thisfar.x) <= DamageRange.y )
             {
-                kiki = thisfar;
-                TheOne = other.gameObject;
-                target.transform.position = TheOne.transform.position;
-            }
-            if (Mathf.Abs(thisfar.x) <= DamageRange.y)
-            {
+                Debug.Log("AllahKahtretsin");
                 GameObject.Find("Slash").GetComponent<AudioSource>().Play();
                 other.GetComponent<EnemyBehaviour>().HealthGo(DamageRange.x*DamageEnchance);
                 other.GetComponent<EnemyBehaviour>().OnAttack();
-                TimeScaler(0.01f, 0.2f);
+                //TimeScaler(0.01f, 0.2f);
+                Debug.Log("OROSPU ÇOCUÐU!");
             }
             DamageRange = new Vector2(0, 0);
-        }
-    }
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.gameObject == TheOne)
-        {
-            kiki = new Vector3(1000, 0, 0);
-            TheOne = this.gameObject;
         }
     }
     public void Attack(Animator Character)
@@ -98,4 +81,3 @@ public class BodyTarget : MonoBehaviour
         Time.fixedDeltaTime = Time.timeScale * 0.02f;
     }
 }
-
