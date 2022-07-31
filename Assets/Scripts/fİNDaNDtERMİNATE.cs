@@ -7,7 +7,9 @@ public class fİNDaNDtERMİNATE : MonoBehaviour
     Vector3 kiki;
     public GameObject target;
     public GameObject TheOne;
+    bool Rotatyeah = true;
     GameObject player;
+    Quaternion rotationknow;
     Animator adam;
     void Start()
     {

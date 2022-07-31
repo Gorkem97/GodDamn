@@ -7,6 +7,7 @@ public class BodyTarget : MonoBehaviour
     Vector2 DamageRange;
     GameObject player;
 
+    public List<GameObject> enemyList = new List<GameObject>();
     public float DamageEnchance = 1;
 
     Coroutine co;
@@ -37,14 +38,21 @@ public class BodyTarget : MonoBehaviour
             Vector3 thisfar = other.transform.position - transform.position;
             if (Mathf.Abs(thisfar.x) <= DamageRange.y )
             {
-                Debug.Log("AllahKahtretsin");
-                GameObject.Find("Slash").GetComponent<AudioSource>().Play();
-                other.GetComponent<EnemyBehaviour>().HealthGo(DamageRange.x*DamageEnchance);
-                other.GetComponent<EnemyBehaviour>().OnAttack();
-                //TimeScaler(0.01f, 0.2f);
-                Debug.Log("OROSPU ÇOCUÐU!");
+                enemyList.Add(other.gameObject);
             }
-            DamageRange = new Vector2(0, 0);
+                foreach (GameObject item in enemyList)
+                {
+                    GameObject.Find("Slash").GetComponent<AudioSource>().Play();
+                    item.GetComponent<EnemyBehaviour>().HealthGo(DamageRange.x * DamageEnchance);
+                    item.GetComponent<EnemyBehaviour>().OnAttack();
+                    TimeScaler(0.04f, 0.1f);
+                    enemyList.Remove(item);
+                    DamageRange = new Vector2(0, 0);
+                }
+            if (enemyList.Count==0)
+            {
+                DamageRange = new Vector2(0, 0);
+            }
         }
     }
     public void Attack(Animator Character)
@@ -56,7 +64,7 @@ public class BodyTarget : MonoBehaviour
     IEnumerator AttackControl()
     {
         AttackStart = true;
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.2f);
         AttackStart = false;
     }
     IEnumerator PlaceHolder()

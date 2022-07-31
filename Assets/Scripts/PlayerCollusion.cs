@@ -18,5 +18,9 @@ public class PlayerCollusion : MonoBehaviour
         {
             Script.Health += 30 * Time.deltaTime;
         }
+        if (other.gameObject.name == "PlayerDetection")
+        {
+            other.gameObject.GetComponentInParent<EnemyBehaviour>().StateFollow = true;
+        }
     }
 }
