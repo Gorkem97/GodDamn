@@ -31,10 +31,16 @@ public class BodyTarget : MonoBehaviour
             adam.SetBool("Ataking", false);
         }
     }
-    private void OnTriggerStay(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         if (other.tag == "Enemy")
         {
+            if (!enemyList.Contains(other.gameObject))
+            {
+                enemyList.Add(other.gameObject);
+            }
+
+            /*
             Vector3 thisfar = other.transform.position - transform.position;
             if (Mathf.Abs(thisfar.x) <= DamageRange.y)
             {
@@ -50,21 +56,23 @@ public class BodyTarget : MonoBehaviour
                     enemyList.Remove(other.gameObject);
                 }
             }
+            Allah();
+            */
         }
 
-        foreach (var emine in enemyList)
+
+    }
+    private void OnTriggerExit(Collider other)
+    {
+
+        if (other.tag == "Enemy")
         {
-            GameObject.Find("Slash").GetComponent<AudioSource>().Play();
-            emine.GetComponent<EnemyBehaviour>().HealthGo(DamageRange.x * DamageEnchance);
-            emine.GetComponent<EnemyBehaviour>().OnAttack();
-            TimeScaler(0.04f, 0.1f);
-            enemyList.Remove(emine);
-            if (enemyList.Count == 0)
+            if (enemyList.Contains(other.gameObject))
             {
-                DamageRange = new Vector2(0, 0);
+                enemyList.Remove(other.gameObject);
             }
-        }
 
+        }
     }
     public void Attack(Animator Character)
     {
@@ -85,6 +93,23 @@ public class BodyTarget : MonoBehaviour
     public void AttackStats(float range,float damage)
     {
         DamageRange = new Vector2(damage, range);
+        int a = 0;
+        foreach (var enemy in enemyList)
+        {
+            a += 1;
+            Vector3 thisfar = enemy.transform.position - transform.position;
+            if (Mathf.Abs(thisfar.x) <= DamageRange.y)
+            {
+                GameObject.Find("Slash").GetComponent<AudioSource>().Play();
+                enemy.gameObject.GetComponent<EnemyBehaviour>().HealthGo(DamageRange.x * DamageEnchance);
+                enemy.gameObject.GetComponent<EnemyBehaviour>().OnAttack();
+                TimeScaler(0.04f, 0.1f);
+            }
+            if (a >= enemyList.Count)
+            {
+                DamageRange = new Vector2(0, 0);
+            }
+        }
     }
 
     void TimeScaler(float timeScaling, float TimeSequance)
@@ -98,5 +123,17 @@ public class BodyTarget : MonoBehaviour
         yield return new WaitForSeconds(scaling * sequance);
         Time.timeScale = 1;
         Time.fixedDeltaTime = Time.timeScale * 0.02f;
+    }
+    IEnumerator EndFrame()
+    {
+        yield return new WaitForEndOfFrame();
+        DamageRange = new Vector2(0, 0);
+    }
+    void Allah()
+    {
+        foreach (GameObject emine in enemyList)
+        {
+        }
+
     }
 }

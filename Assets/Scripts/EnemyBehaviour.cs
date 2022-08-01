@@ -86,6 +86,7 @@ public class EnemyBehaviour : MonoBehaviour
         {
             HealthBar.GetComponent<Slider>().value = 0;
             GameObject.Find("ALLAH").GetComponent<fÝNDaNDtERMÝNATE>().TheOne = GameObject.Find("ALLAH");
+            GameObject.Find("AttackAndCam").GetComponent<BodyTarget>().enemyList.Remove(this.gameObject);
             Player.GetComponent<walk>().TakeDamage(-70);
             Destroy(this.gameObject);
         }
