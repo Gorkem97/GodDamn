@@ -46,6 +46,7 @@ public class walk : MonoBehaviour
     float range=0;
     float damage=0;
     public BodyTarget AttackSequance;
+    public GameObject atakCizgi;
     [Space(5)]
 
     [Header("Roll")]
@@ -93,9 +94,7 @@ public class walk : MonoBehaviour
             range = 0;
         }
 
-        if (CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("draw") || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack1") || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack2") 
-            || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack3") || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("roll") || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("blok") 
-            || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("Great Sword Impact"))
+        if (CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("roll") || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("blok") || CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("Great Sword Impact"))
         {
             hareketmi = false;
         }
@@ -103,8 +102,21 @@ public class walk : MonoBehaviour
         {
             hareketmi = true;
         }
+        if (CharacterAnimator.GetCurrentAnimatorStateInfo(1).IsName("UpperIdle"))
+        {
+            CharacterAnimator.SetLayerWeight(1, 0);
+            atakCizgi.SetActive(false);
+        }
+        if (CharacterAnimator.GetCurrentAnimatorStateInfo(1).IsName("Attack1"))
+        {
+            atakCizgi.SetActive(true);
+            CharacterAnimator.SetLayerWeight(1, 1);
+        }
+        if (CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("blok"))
+        {
+            atakCizgi.SetActive(true);
+        }
 
-        
         if (Health >= 100)
         {
             Health = 100;
@@ -234,12 +246,13 @@ public class walk : MonoBehaviour
     }
     private void Jump(InputAction.CallbackContext context)
     {
-        if (isWalking)
+        if (isWalking )
         {
             CharacterAnimator.SetTrigger("jump");
             CharacterAnimator.SetBool("yerdemi", false);
             GravitationalSpeed = -JumpForce;
-            controller.Move(new Vector3(0, 1, 0) * 0.3f);        }
+            controller.Move(new Vector3(0, 1, 0) * 0.3f);        
+        }
     }
     private void Slide(InputAction.CallbackContext context)
     {
@@ -273,6 +286,7 @@ public class walk : MonoBehaviour
     public void AttackDamage(float a)
     {
         damage = a;
+        GameObject.Find("Swoosh").GetComponent<AudioSource>().Play();
     }
     public void AttackRange(float a)
     {

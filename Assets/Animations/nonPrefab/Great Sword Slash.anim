@@ -66788,6 +66788,6 @@ AnimationClip:
     functionName: AttackRange
     data: 
     objectReferenceParameter: {fileID: 0}
-    floatParameter: 1.5
+    floatParameter: 2.5
     intParameter: 0
     messageOptions: 0

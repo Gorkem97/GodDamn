@@ -2,10 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.AI;
 
 public class EnemyBehaviour : MonoBehaviour
 {
     public Transform Player;
+    Transform StartTransform;
     public GameObject bit;
     public float goBac = 100;
     public float EnemyCurrentHealth;
@@ -16,7 +18,17 @@ public class EnemyBehaviour : MonoBehaviour
     Rigidbody rb;
     Vector3 drag;
 
+    public bool StateFollow = false;
+    public bool run = false;
+    NavMeshAgent EnemyAgent;
+    
+
     public bool bekle =false;
+    private void Awake()
+    {
+        EnemyAgent = GetComponent<NavMeshAgent>();
+        StartTransform = transform;
+    }
     void Start()
     {
         EnemyAnimation = GetComponent<Animator>();
@@ -31,31 +43,50 @@ public class EnemyBehaviour : MonoBehaviour
         }
         HealthBar.transform.rotation = Quaternion.LookRotation(Camera.main.transform.position);
         HealthBar.GetComponent<Slider>().value = EnemyCurrentHealth / EnemyMaxHealth;
+        if (StateFollow)
+        {
+            EnemyAnimation.SetBool("run", true);
+            if (!this.EnemyAnimation.GetCurrentAnimatorStateInfo(0).IsName("cut"))
+            {
+                if (Player.position.x < transform.position.x)
+                {
+                    drag = new Vector3(-90, 0, 0).normalized;
+                    Quaternion rotation = Quaternion.LookRotation(drag);
+                    transform.rotation = rotation;
+                }
+                if (Player.position.x > transform.position.x)
+                {
+                    drag = new Vector3(90, 0, 0).normalized;
+                    Quaternion rotation = Quaternion.LookRotation(drag);
+                    transform.rotation = rotation;
+                }
+                if (Mathf.Abs(Player.position.x - transform.position.x) > 2.5f)
+                {
+                    EnemyAgent.destination = Player.transform.position;
+                }
+            }
+            if (Mathf.Abs(Player.position.x - transform.position.x) <= 2.5f)
+            {
+                EnemyAgent.destination = transform.position;
+            }
+            if (Mathf.Abs(Player.position.x - transform.position.x) < 4 && !bekle)
+            {
+                StartCoroutine(Vuruyongm());
+            }
 
-        if (this.EnemyAnimation.GetCurrentAnimatorStateInfo(0).IsName("cut"))
-        {
-            if (Player.position.x < transform.position.x)
-            {
-                drag = new Vector3(-90, 0, 0).normalized;
-                Quaternion rotation = Quaternion.LookRotation(drag);
-                transform.rotation = rotation;
-            }
-            if (Player.position.x > transform.position.x)
-            {
-                drag = new Vector3(90, 0, 0).normalized;
-                Quaternion rotation = Quaternion.LookRotation(drag);
-                transform.rotation = rotation;
-            }
         }
-        if (Mathf.Abs(Player.position.x - transform.position.x) <4 && !bekle)
+
+        if (!StateFollow)
         {
-            StartCoroutine(Vuruyongm());
+            EnemyAgent.destination = StartTransform.position;
+            transform.LookAt(StartTransform);
         }
 
         if (EnemyCurrentHealth<=0)
         {
             HealthBar.GetComponent<Slider>().value = 0;
             GameObject.Find("ALLAH").GetComponent<fÝNDaNDtERMÝNATE>().TheOne = GameObject.Find("ALLAH");
+            GameObject.Find("AttackAndCam").GetComponent<BodyTarget>().enemyList.Remove(this.gameObject);
             Player.GetComponent<walk>().TakeDamage(-70);
             Destroy(this.gameObject);
         }
@@ -67,12 +98,13 @@ public class EnemyBehaviour : MonoBehaviour
     public void OnAttack()
     {
         //rb.AddForce(-transform.forward*goBac);
-        transform.position = transform.position + transform.forward*-0.5f;
+        transform.position = transform.position + transform.forward*-2f;
     }
     public void HealthGo(float range)
     {
         EnemyCurrentHealth -= range;
         EnemyAnimation.SetTrigger("OuchStand");
+        StateFollow = true;
     }
     IEnumerator Vuruyongm()
     {
