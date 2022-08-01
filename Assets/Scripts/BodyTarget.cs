@@ -36,24 +36,35 @@ public class BodyTarget : MonoBehaviour
         if (other.tag == "Enemy")
         {
             Vector3 thisfar = other.transform.position - transform.position;
-            if (Mathf.Abs(thisfar.x) <= DamageRange.y )
+            if (Mathf.Abs(thisfar.x) <= DamageRange.y)
             {
-                enemyList.Add(other.gameObject);
-            }
-                foreach (GameObject item in enemyList)
+                if (!enemyList.Contains(other.gameObject))
                 {
-                    GameObject.Find("Slash").GetComponent<AudioSource>().Play();
-                    item.GetComponent<EnemyBehaviour>().HealthGo(DamageRange.x * DamageEnchance);
-                    item.GetComponent<EnemyBehaviour>().OnAttack();
-                    TimeScaler(0.04f, 0.1f);
-                    enemyList.Remove(item);
-                    DamageRange = new Vector2(0, 0);
+                    enemyList.Add(other.gameObject);
                 }
-            if (enemyList.Count==0)
+            }
+            if (Mathf.Abs(thisfar.x) > DamageRange.y)
+            {
+                if (enemyList.Contains(other.gameObject))
+                {
+                    enemyList.Remove(other.gameObject);
+                }
+            }
+        }
+
+        foreach (var emine in enemyList)
+        {
+            GameObject.Find("Slash").GetComponent<AudioSource>().Play();
+            emine.GetComponent<EnemyBehaviour>().HealthGo(DamageRange.x * DamageEnchance);
+            emine.GetComponent<EnemyBehaviour>().OnAttack();
+            TimeScaler(0.04f, 0.1f);
+            enemyList.Remove(emine);
+            if (enemyList.Count == 0)
             {
                 DamageRange = new Vector2(0, 0);
             }
         }
+
     }
     public void Attack(Animator Character)
     {

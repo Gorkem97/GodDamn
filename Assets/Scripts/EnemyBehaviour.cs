@@ -97,7 +97,7 @@ public class EnemyBehaviour : MonoBehaviour
     public void OnAttack()
     {
         //rb.AddForce(-transform.forward*goBac);
-        //transform.position = transform.position + transform.forward*-2.5f;
+        transform.position = transform.position + transform.forward*-2f;
     }
     public void HealthGo(float range)
     {

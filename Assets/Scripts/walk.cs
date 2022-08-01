@@ -112,7 +112,11 @@ public class walk : MonoBehaviour
             atakCizgi.SetActive(true);
             CharacterAnimator.SetLayerWeight(1, 1);
         }
-        
+        if (CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("blok"))
+        {
+            atakCizgi.SetActive(true);
+        }
+
         if (Health >= 100)
         {
             Health = 100;

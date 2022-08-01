@@ -1628,7 +1628,7 @@ PrefabInstance:
     - target: {fileID: 7758783646667266501, guid: b726ae8986a665e4c80350dc874e24ca,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -8.68
+      value: 0.94
       objectReference: {fileID: 0}
     - target: {fileID: 7758783646667266501, guid: b726ae8986a665e4c80350dc874e24ca,
         type: 3}
@@ -3973,7 +3973,7 @@ PrefabInstance:
     - target: {fileID: 7758783646667266501, guid: b726ae8986a665e4c80350dc874e24ca,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -7.92
+      value: -0.25
       objectReference: {fileID: 0}
     - target: {fileID: 7758783646667266501, guid: b726ae8986a665e4c80350dc874e24ca,
         type: 3}
@@ -10190,6 +10190,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 362412071427753539, guid: 656c621008f00454b9358ab73b69c7c8,
+        type: 3}
+      propertyPath: m_WarningMessage
+      value: "\nBinding warning: Some generic clip(s) animate transforms that are
+        already bound by a Humanoid avatar. These transforms can only be changed
+        by Humanoid clips.\n\tTransform 'Neck'\n\tTransform 'Head'\n\tTransform 'Neck'\n\tTransform
+        'Head'\n\tTransform 'Neck'\n\tTransform 'Head'"
+      objectReference: {fileID: 0}
     - target: {fileID: 6045984709224045625, guid: 656c621008f00454b9358ab73b69c7c8,
         type: 3}
       propertyPath: m_RootOrder
