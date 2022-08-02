@@ -6,6 +6,7 @@ public class BodyTarget : MonoBehaviour
 {
     Vector2 DamageRange;
     GameObject player;
+    bool HavenTsTabbed=true;
 
     public List<GameObject> enemyList = new List<GameObject>();
     public float DamageEnchance = 1;
@@ -24,7 +25,17 @@ public class BodyTarget : MonoBehaviour
     {
         if (AttackStart)
         {
-            adam.SetBool("Ataking", true);
+            walk annen = player.GetComponent<walk>();
+            if (annen.onEnemy && HavenTsTabbed)
+            {
+                adam.SetTrigger("Stab");
+                HavenTsTabbed = false;
+                StartCoroutine(WaitStab());
+            }
+            else
+            {
+                adam.SetBool("Ataking", true);
+            }
         }
         if (!AttackStart)
         {
@@ -64,9 +75,10 @@ public class BodyTarget : MonoBehaviour
     }
     IEnumerator AttackControl()
     {
-        AttackStart = true;
-        yield return new WaitForSeconds(0.2f);
-        AttackStart = false;
+            AttackStart = true;
+            yield return new WaitForSeconds(0.2f);
+            AttackStart = false;
+
     }
     IEnumerator PlaceHolder()
     {
@@ -106,16 +118,9 @@ public class BodyTarget : MonoBehaviour
         Time.timeScale = 1;
         Time.fixedDeltaTime = Time.timeScale * 0.02f;
     }
-    IEnumerator EndFrame()
+    IEnumerator WaitStab()
     {
-        yield return new WaitForEndOfFrame();
-        DamageRange = new Vector2(0, 0);
-    }
-    void Allah()
-    {
-        foreach (GameObject emine in enemyList)
-        {
-        }
-
+        yield return new WaitForSeconds(4);
+        HavenTsTabbed = true;
     }
 }

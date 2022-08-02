@@ -10,6 +10,7 @@ public class walk : MonoBehaviour
 
     CharacterController controller;
     public float Health = 100;
+    public float MaxHealth = 100;
 
     [Header("AfterDeath")]
     public Vector3 BeforeTransform;
@@ -71,7 +72,9 @@ public class walk : MonoBehaviour
     public bool isParry = false;
     GameObject ParyParticle;
     Transform ParryLit;
-    
+    public GameObject ParyEnemy;
+    public bool haveparried = false;
+    public bool onEnemy = false;
     [Space(5)]
 
 
@@ -124,20 +127,15 @@ public class walk : MonoBehaviour
             CharacterAnimator.SetLayerWeight(1, 0);
             atakCizgi.SetActive(false);
         }
-        if (CharacterAnimator.GetCurrentAnimatorStateInfo(1).IsName("Attack1"))
-        {
-            atakCizgi.SetActive(true);
-            CharacterAnimator.SetLayerWeight(1, 1);
-        }
-        if (CharacterAnimator.GetCurrentAnimatorStateInfo(1).IsName("blok"))
+        if (CharacterAnimator.GetCurrentAnimatorStateInfo(1).IsName("Attack1") || CharacterAnimator.GetCurrentAnimatorStateInfo(1).IsName("blok")|| CharacterAnimator.GetCurrentAnimatorStateInfo(1).IsName("Stabbing"))
         {
             atakCizgi.SetActive(true);
             CharacterAnimator.SetLayerWeight(1, 1);
         }
 
-        if (Health >= 100)
+        if (Health > MaxHealth)
         {
-            Health = 100;
+            Health = MaxHealth;
             GameObject.Find("HealthBar").GetComponent<Slider>().value = 1;
         }
         if (Health<=0)
@@ -155,7 +153,7 @@ public class walk : MonoBehaviour
         }
         else
         {
-            GameObject.Find("HealthBar").GetComponent<Slider>().value = Health / 100;
+            GameObject.Find("HealthBar").GetComponent<Slider>().value = Health / MaxHealth;
         }
         if (GravitationalSpeed>=0 && GravityPull)
         {
@@ -203,7 +201,10 @@ public class walk : MonoBehaviour
         {
             Health += 9;
         }
-
+        if (hit.gameObject == ParyEnemy)
+        {
+            onEnemy = true;
+        }
     }
     
     private void FixedUpdate()
@@ -363,11 +364,29 @@ public class walk : MonoBehaviour
     {
         Health += 30;
         GameObject.Find("Parry").GetComponent<AudioSource>().Play();
+
         ParyParticle.GetComponent<ParticleSystem>().Play();
         CameraShake.Instance.ShakeCamera(4,1);
         ParryLit.GetComponent<Light>().intensity = 10;
         yield return new WaitForSeconds(1);
         ParryLit.GetComponent<Light>().intensity = 0;
+    }
+    public void parriedObject(GameObject Penemy)
+    {
+        ParyEnemy = Penemy;
+        haveparried = true;
+    }
+    public void Stabbed()
+    {
+        onEnemy = false;
+        Health = MaxHealth;
+        GameObject.Find("Slash").GetComponent<AudioSource>().Play();
+        ParyEnemy.GetComponent<EnemyBehaviour>().HealthGo(ParyEnemy.GetComponent<EnemyBehaviour>().EnemyMaxHealth);
+    }
+    public void CameraShaker()
+    {
+        GameObject.Find("Slash").GetComponent<AudioSource>().Play();
+        CameraShake.Instance.ShakeCamera(6, 2);
     }
 }
 

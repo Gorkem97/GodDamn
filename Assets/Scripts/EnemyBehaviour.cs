@@ -10,18 +10,17 @@ public class EnemyBehaviour : MonoBehaviour
     public Transform StartTransform;
     public GameObject bit;
     public GameObject EnemyUI;
-    public GameObject camCam;
     public float goBac = 100;
     public float EnemyCurrentHealth;
     public float EnemyMaxHealth = 100;
     public bool yokosunmu = false;
     public GameObject HealthBar;
     Animator EnemyAnimation;
-    Rigidbody rb;
     Vector3 drag;
 
     public bool StateFollow = false;
     public bool run = false;
+    bool HaveBeenParried = false;
     NavMeshAgent EnemyAgent;
     
 
@@ -35,15 +34,15 @@ public class EnemyBehaviour : MonoBehaviour
     {
         EnemyAnimation = GetComponent<Animator>();
         EnemyCurrentHealth = EnemyMaxHealth;
-        rb = this.gameObject.GetComponent<Rigidbody>();
     }
     void Update()
     {
+
         if (yokosunmu)
         {
             StartCoroutine(Destiny());
         }
-        //EnemyUI.transform.rotation = Quaternion.LookRotation(camCam.transform.position);
+        EnemyUI.transform.rotation = Quaternion.Euler(0.0f, 0.0f, gameObject.transform.rotation.z * -1.0f);
         HealthBar.GetComponent<Slider>().value = EnemyCurrentHealth / EnemyMaxHealth;
         if (StateFollow)
         {
@@ -89,7 +88,8 @@ public class EnemyBehaviour : MonoBehaviour
             HealthBar.GetComponent<Slider>().value = 0;
             GameObject.Find("ALLAH").GetComponent<fÝNDaNDtERMÝNATE>().TheOne = GameObject.Find("ALLAH");
             GameObject.Find("AttackAndCam").GetComponent<BodyTarget>().enemyList.Remove(this.gameObject);
-            Player.GetComponent<walk>().TakeDamage(-70);
+            Player.GetComponent<walk>().ParyEnemy = Player.gameObject;
+            Player.GetComponent<walk>().onEnemy = false;
             this.gameObject.SetActive(false);
         }
         else
@@ -119,6 +119,13 @@ public class EnemyBehaviour : MonoBehaviour
         if (Mathf.Abs(Player.position.x - transform.position.x) < 3)
         {
             Player.GetComponent<walk>().TakeDamage(30);
+            if (Player.GetComponent<walk>().isParry)
+            {
+                EnemyAnimation.SetBool("Parried",true);
+                HaveBeenParried = true;
+                StartCoroutine(parryWait());
+                Player.GetComponent<walk>().parriedObject(this.gameObject);
+            }
         }
     }
     IEnumerator Destiny()
@@ -133,5 +140,14 @@ public class EnemyBehaviour : MonoBehaviour
         transform.position = StartTransform.position;
         EnemyAgent.enabled = !EnemyAgent.enabled;
         StateFollow = false;
+    }
+    IEnumerator parryWait()
+    {
+        yield return new WaitForSeconds(4);
+        EnemyAnimation.SetBool("Parried", false);
+        walk annen = Player.GetComponent<walk>();
+        annen.onEnemy = false;
+        annen.haveparried = false;
+        annen.ParyEnemy = Player.gameObject;
     }
 }
