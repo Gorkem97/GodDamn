@@ -6,8 +6,16 @@ using UnityEngine.InputSystem;
 
 public class walk : MonoBehaviour
 {
+
+
     CharacterController controller;
     public float Health = 100;
+
+    [Header("AfterDeath")]
+    public Vector3 BeforeTransform;
+    public List<GameObject> enemies = new List<GameObject>();
+    [Space(5)]
+
 
     [Header("Gravity and Jump")]
     public float GravityScale = 0.1f;
@@ -18,10 +26,12 @@ public class walk : MonoBehaviour
     bool isWalking;
     float raycastDistance = 0.08f;
     bool waitingJump;
+    int jumpWait =0;
     [Space(5)]
 
     [Header("CharacterMovement")]
     public float speed;
+    float OriginalSpeed;
     public float smoothness = 60f;
     public float turnSmoothTime = 0.1f;
     public float turnSmoothVelocity;
@@ -61,6 +71,7 @@ public class walk : MonoBehaviour
     public bool isParry = false;
     GameObject ParyParticle;
     Transform ParryLit;
+    
     [Space(5)]
 
 
@@ -68,11 +79,17 @@ public class walk : MonoBehaviour
     Quaternion rotationknow;
     void Start()
     {
+        foreach (GameObject item in GameObject.FindGameObjectsWithTag("Enemy"))
+        {
+            enemies.Add(item);
+        }
+        BeforeTransform = transform.position;
         GravityHolder = GravityScale;
         CharacterAnimator = this.gameObject.GetComponent<Animator>();
         SlideIgnore = GameObject.Find("EmptyCollider");
         ParyParticle = GameObject.Find("ParryParticle");
         ParryLit = ParyParticle.transform.GetChild(0);
+        OriginalSpeed = speed;
     }
     private void Awake()
     {
@@ -112,9 +129,10 @@ public class walk : MonoBehaviour
             atakCizgi.SetActive(true);
             CharacterAnimator.SetLayerWeight(1, 1);
         }
-        if (CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName("blok"))
+        if (CharacterAnimator.GetCurrentAnimatorStateInfo(1).IsName("blok"))
         {
             atakCizgi.SetActive(true);
+            CharacterAnimator.SetLayerWeight(1, 1);
         }
 
         if (Health >= 100)
@@ -124,10 +142,16 @@ public class walk : MonoBehaviour
         }
         if (Health<=0)
         {
-            Health = 0;
+            Health = 100;
             GameObject.Find("HealthBar").GetComponent<Slider>().value = 0;
-            hareketmi = false;
-            bit.SetActive(true);
+            controller.enabled = !controller.enabled;
+            this.gameObject.transform.position = BeforeTransform;
+            controller.enabled = !controller.enabled;
+            foreach (GameObject item in enemies)
+            {
+                item.SetActive(true);
+                item.GetComponent<EnemyBehaviour>().Restart();
+            }
         }
         else
         {
@@ -135,7 +159,7 @@ public class walk : MonoBehaviour
         }
         if (GravitationalSpeed>=0 && GravityPull)
         {
-            GravityScale = GravityScale*8/10;
+            GravityScale = GravityScale*9/10;
             GravityPull = false;
         }
 
@@ -147,6 +171,7 @@ public class walk : MonoBehaviour
         {
             if (hit.collider.tag == "Ground" && !waitingJump)
             {
+                jumpWait = 0;
                 isWalking = true;
                 GravityPull = true;
                 CharacterAnimator.SetBool("yerdemi", true);
@@ -156,8 +181,12 @@ public class walk : MonoBehaviour
         }
         else
         {
-            isWalking = false;
-            CharacterAnimator.SetBool("yerdemi", false);
+            jumpWait += 1;
+            if (jumpWait>=10)
+            {
+                isWalking = false;
+                CharacterAnimator.SetBool("yerdemi", false);
+            }
         }
     }
     private void OnControllerColliderHit(ControllerColliderHit hit)
@@ -180,7 +209,7 @@ public class walk : MonoBehaviour
     private void FixedUpdate()
     {
 
-        Health -= 8 * Time.fixedDeltaTime;
+        Health -= 12 * Time.fixedDeltaTime;
         if (hareketmi)
         {
             moveDirection = move.ReadValue<Vector2>();
@@ -270,6 +299,8 @@ public class walk : MonoBehaviour
         CharacterAnimator.SetBool("blocking", false);
         isBlocking = false;
         isParry = false;
+        CharacterAnimator.speed = 1f;
+        speed = OriginalSpeed;
     }
     IEnumerator Sliding()
     {
@@ -332,7 +363,8 @@ public class walk : MonoBehaviour
         Health += 30;
         GameObject.Find("Parry").GetComponent<AudioSource>().Play();
         ParyParticle.GetComponent<ParticleSystem>().Play();
-        ParryLit.GetComponent<Light>().intensity = 3;
+        CameraShake.Instance.ShakeCamera(4,1);
+        ParryLit.GetComponent<Light>().intensity = 10;
         yield return new WaitForSeconds(1);
         ParryLit.GetComponent<Light>().intensity = 0;
     }

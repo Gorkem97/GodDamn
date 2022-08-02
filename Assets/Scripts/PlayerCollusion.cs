@@ -17,6 +17,7 @@ public class PlayerCollusion : MonoBehaviour
         if (other.gameObject.tag == "Light")
         {
             Script.Health += 30 * Time.deltaTime;
+            Player.GetComponent<walk>().BeforeTransform = Player.transform.position;
         }
         if (other.gameObject.name == "PlayerDetection")
         {

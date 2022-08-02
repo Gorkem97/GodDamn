@@ -40,24 +40,6 @@ public class BodyTarget : MonoBehaviour
                 enemyList.Add(other.gameObject);
             }
 
-            /*
-            Vector3 thisfar = other.transform.position - transform.position;
-            if (Mathf.Abs(thisfar.x) <= DamageRange.y)
-            {
-                if (!enemyList.Contains(other.gameObject))
-                {
-                    enemyList.Add(other.gameObject);
-                }
-            }
-            if (Mathf.Abs(thisfar.x) > DamageRange.y)
-            {
-                if (enemyList.Contains(other.gameObject))
-                {
-                    enemyList.Remove(other.gameObject);
-                }
-            }
-            Allah();
-            */
         }
 
 

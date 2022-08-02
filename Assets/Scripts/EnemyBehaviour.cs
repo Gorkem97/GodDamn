@@ -7,7 +7,7 @@ using UnityEngine.AI;
 public class EnemyBehaviour : MonoBehaviour
 {
     public Transform Player;
-    Transform StartTransform;
+    public Transform StartTransform;
     public GameObject bit;
     public float goBac = 100;
     public float EnemyCurrentHealth;
@@ -88,7 +88,7 @@ public class EnemyBehaviour : MonoBehaviour
             GameObject.Find("ALLAH").GetComponent<fÝNDaNDtERMÝNATE>().TheOne = GameObject.Find("ALLAH");
             GameObject.Find("AttackAndCam").GetComponent<BodyTarget>().enemyList.Remove(this.gameObject);
             Player.GetComponent<walk>().TakeDamage(-70);
-            Destroy(this.gameObject);
+            this.gameObject.SetActive(false);
         }
         else
         {
@@ -124,5 +124,13 @@ public class EnemyBehaviour : MonoBehaviour
     {
         yield return new WaitForSeconds(0.1f);
         Destroy(this.gameObject);
+    }
+    public void Restart()
+    {
+        EnemyCurrentHealth = EnemyMaxHealth;
+        GetComponent<NavMeshAgent>().enabled = !GetComponent<NavMeshAgent>().enabled;
+        transform.position = StartTransform.position;
+        GetComponent<NavMeshAgent>().enabled = !GetComponent<NavMeshAgent>().enabled;
+        StateFollow = false;
     }
 }
