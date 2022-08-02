@@ -334,6 +334,7 @@ public class walk : MonoBehaviour
                     Health -= Nooo;
                     GameObject.Find("Slash").GetComponent<AudioSource>().Play();
                     //CharacterAnimator.SetTrigger("OuchStand");
+                    GameObject.Find("Hurt").GetComponent<AudioSource>().Play();
                 }
                 else
                 {

@@ -9,6 +9,8 @@ public class EnemyBehaviour : MonoBehaviour
     public Transform Player;
     public Transform StartTransform;
     public GameObject bit;
+    public GameObject EnemyUI;
+    public GameObject camCam;
     public float goBac = 100;
     public float EnemyCurrentHealth;
     public float EnemyMaxHealth = 100;
@@ -41,7 +43,7 @@ public class EnemyBehaviour : MonoBehaviour
         {
             StartCoroutine(Destiny());
         }
-        HealthBar.transform.rotation = Quaternion.LookRotation(Camera.main.transform.position);
+        //EnemyUI.transform.rotation = Quaternion.LookRotation(camCam.transform.position);
         HealthBar.GetComponent<Slider>().value = EnemyCurrentHealth / EnemyMaxHealth;
         if (StateFollow)
         {
@@ -97,7 +99,6 @@ public class EnemyBehaviour : MonoBehaviour
     }
     public void OnAttack()
     {
-        //rb.AddForce(-transform.forward*goBac);
         transform.position = transform.position + transform.forward*-2f;
     }
     public void HealthGo(float range)
@@ -128,9 +129,9 @@ public class EnemyBehaviour : MonoBehaviour
     public void Restart()
     {
         EnemyCurrentHealth = EnemyMaxHealth;
-        GetComponent<NavMeshAgent>().enabled = !GetComponent<NavMeshAgent>().enabled;
+        EnemyAgent.enabled = !EnemyAgent.enabled;
         transform.position = StartTransform.position;
-        GetComponent<NavMeshAgent>().enabled = !GetComponent<NavMeshAgent>().enabled;
+        EnemyAgent.enabled = !EnemyAgent.enabled;
         StateFollow = false;
     }
 }

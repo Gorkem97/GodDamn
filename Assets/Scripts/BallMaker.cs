@@ -4,15 +4,22 @@ using UnityEngine;
 
 public class BallMaker : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public GameObject Ballz;
+    public float timmy = 3;
+    bool Atesle = true;
 
-    // Update is called once per frame
     void Update()
     {
-        
+        if (Atesle)
+        {
+            Instantiate(Ballz, transform.position, transform.rotation);
+            StartCoroutine(time(timmy));
+            Atesle = false;
+        }
+    }
+    IEnumerator time(float timi)
+    {
+        yield return new WaitForSeconds(timi);
+        Atesle = true;
     }
 }

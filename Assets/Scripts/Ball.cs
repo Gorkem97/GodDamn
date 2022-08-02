@@ -11,7 +11,7 @@ public class Ball : MonoBehaviour
     void Start()
     {
         taret = GameObject.Find("TargetBall");
-        BallTime(time);
+        StartCoroutine(BallTime(time));
         transform.LookAt(taret.transform);
     }
 

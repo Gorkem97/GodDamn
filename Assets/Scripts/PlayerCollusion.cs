@@ -24,4 +24,11 @@ public class PlayerCollusion : MonoBehaviour
             other.gameObject.GetComponentInParent<EnemyBehaviour>().StateFollow = true;
         }
     }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "CannonBall")
+        {
+            Player.GetComponent<walk>().TakeDamage(40);
+        }
+    }
 }
