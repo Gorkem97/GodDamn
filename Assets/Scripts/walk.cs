@@ -47,7 +47,6 @@ public class walk : MonoBehaviour
     private InputAction jump;
     private InputAction slide;
     private InputAction block;
-    private InputAction escape;
     [Space(5)]
 
 
@@ -97,7 +96,7 @@ public class walk : MonoBehaviour
     }
     private void Awake()
     {
-        playerControls = new   PlayerCommands();
+        playerControls = new PlayerCommands();
         controller = this.gameObject.GetComponent<CharacterController>();
         StartCoroutine(IdleController());
     }
@@ -262,7 +261,6 @@ public class walk : MonoBehaviour
         block.Enable();
         block.performed += Block;
         block.canceled += BlockRelease;
-        escape = playerControls.Player.
     }
     private void OnDisable()
     {
@@ -388,7 +386,7 @@ public class walk : MonoBehaviour
     public void CameraShaker()
     {
         GameObject.Find("Slash").GetComponent<AudioSource>().Play();
-        CameraShake.Instance.ShakeCamera(10, 2);
+        CameraShake.Instance.ShakeCamera(6, 2);
     }
 }
 
