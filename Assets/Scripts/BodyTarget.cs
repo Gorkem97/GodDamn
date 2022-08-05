@@ -97,7 +97,7 @@ public class BodyTarget : MonoBehaviour
                 GameObject.Find("Slash").GetComponent<AudioSource>().Play();
                 enemy.gameObject.GetComponent<EnemyBehaviour>().HealthGo(DamageRange.x * DamageEnchance);
                 enemy.gameObject.GetComponent<EnemyBehaviour>().OnAttack();
-                TimeScaler(0.04f, 0.1f);
+                TimeScaler(0.01f, 0.2f);
             }
             if (a >= enemyList.Count)
             {

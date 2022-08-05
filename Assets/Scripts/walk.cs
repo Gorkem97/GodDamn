@@ -37,6 +37,7 @@ public class walk : MonoBehaviour
     public float turnSmoothTime = 0.1f;
     public float turnSmoothVelocity;
     Vector2 moveDirection = Vector2.zero;
+    public bool AmIwalking = false;
     Vector3 walkRoute;
     [Space(5)]
 
@@ -58,6 +59,7 @@ public class walk : MonoBehaviour
     float damage=0;
     public BodyTarget AttackSequance;
     public GameObject atakCizgi;
+    bool attackGo = false;
     [Space(5)]
 
     [Header("Roll")]
@@ -131,6 +133,14 @@ public class walk : MonoBehaviour
         {
             atakCizgi.SetActive(true);
             CharacterAnimator.SetLayerWeight(1, 1);
+        }
+        if (CharacterAnimator.GetCurrentAnimatorStateInfo(2).IsName("emptyLegs"))
+        {
+            CharacterAnimator.SetLayerWeight(2, 0);
+        }
+        if (!CharacterAnimator.GetCurrentAnimatorStateInfo(2).IsName("emptyLegs"))
+        {
+            CharacterAnimator.SetLayerWeight(2, 1);
         }
 
         if (Health > MaxHealth)
@@ -209,7 +219,6 @@ public class walk : MonoBehaviour
     
     private void FixedUpdate()
     {
-
         Health -= 12 * Time.fixedDeltaTime;
         if (hareketmi)
         {
@@ -219,6 +228,7 @@ public class walk : MonoBehaviour
             if (direction.magnitude > 0)
             {
                 controller.Move(walkRoute * speed * Time.fixedDeltaTime);
+                AmIwalking = true;
                 float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
                 float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
                 transform.rotation = Quaternion.Euler(0, angle, 0);
@@ -227,6 +237,7 @@ public class walk : MonoBehaviour
             if (direction.magnitude == 0)
             {
                 CharacterAnimator.SetBool("yuruyormu", false);
+                AmIwalking = false;
             }
         }
         if (rolling)
@@ -234,6 +245,11 @@ public class walk : MonoBehaviour
             controller.Move(transform.forward * rollSpeed * Time.fixedDeltaTime);
         }
         controller.Move(new Vector3(0, -1, 0) * GravitationalSpeed * Time.fixedDeltaTime);
+        if (attackGo)
+        {
+            controller.Move(transform.forward * speed * Time.fixedDeltaTime);
+            CharacterAnimator.SetBool("yuruyormu", true);
+        }
     }
 
     IEnumerator IdleController()
@@ -279,6 +295,7 @@ public class walk : MonoBehaviour
         if (isWalking )
         {
             CharacterAnimator.SetTrigger("jump");
+            GameObject.Find("Jump").GetComponent<AudioSource>().Play();
             CharacterAnimator.SetBool("yerdemi", false);
             GravitationalSpeed = -JumpForce;
             controller.Move(new Vector3(0, 1, 0) * 0.3f);        
@@ -365,6 +382,7 @@ public class walk : MonoBehaviour
         Health += 30;
         GameObject.Find("Parry").GetComponent<AudioSource>().Play();
 
+        GameObject.Find("Seath").GetComponent<AudioSource>().Play();
         ParyParticle.GetComponent<ParticleSystem>().Play();
         CameraShake.Instance.ShakeCamera(4,1);
         ParryLit.GetComponent<Light>().intensity = 10;
@@ -386,7 +404,25 @@ public class walk : MonoBehaviour
     public void CameraShaker()
     {
         GameObject.Find("Slash").GetComponent<AudioSource>().Play();
-        CameraShake.Instance.ShakeCamera(6, 2);
+        CameraShake.Instance.ShakeCamera(10, 2);
+    }
+    public void FootStep()
+    {
+        GameObject.Find("Step").GetComponent<AudioSource>().Play();
+    }
+    public void ShouldLeap()
+    {
+        if (!AmIwalking)
+        {
+            StartCoroutine(attackGoing());
+        }
+
+    }
+    IEnumerator attackGoing()
+    {
+        attackGo = true;
+        yield return new WaitForSeconds(0.2f);
+        attackGo = false;
     }
 }
 
