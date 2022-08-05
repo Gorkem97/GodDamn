@@ -6,6 +6,7 @@ public class BodyTarget : MonoBehaviour
 {
     Vector2 DamageRange;
     GameObject player;
+    bool HavenTsTabbed=true;
 
     public List<GameObject> enemyList = new List<GameObject>();
     public float DamageEnchance = 1;
@@ -24,7 +25,17 @@ public class BodyTarget : MonoBehaviour
     {
         if (AttackStart)
         {
-            adam.SetBool("Ataking", true);
+            walk annen = player.GetComponent<walk>();
+            if (annen.onEnemy && HavenTsTabbed)
+            {
+                adam.SetTrigger("Stab");
+                HavenTsTabbed = false;
+                StartCoroutine(WaitStab());
+            }
+            else
+            {
+                adam.SetBool("Ataking", true);
+            }
         }
         if (!AttackStart)
         {
@@ -40,24 +51,6 @@ public class BodyTarget : MonoBehaviour
                 enemyList.Add(other.gameObject);
             }
 
-            /*
-            Vector3 thisfar = other.transform.position - transform.position;
-            if (Mathf.Abs(thisfar.x) <= DamageRange.y)
-            {
-                if (!enemyList.Contains(other.gameObject))
-                {
-                    enemyList.Add(other.gameObject);
-                }
-            }
-            if (Mathf.Abs(thisfar.x) > DamageRange.y)
-            {
-                if (enemyList.Contains(other.gameObject))
-                {
-                    enemyList.Remove(other.gameObject);
-                }
-            }
-            Allah();
-            */
         }
 
 
@@ -82,9 +75,10 @@ public class BodyTarget : MonoBehaviour
     }
     IEnumerator AttackControl()
     {
-        AttackStart = true;
-        yield return new WaitForSeconds(0.2f);
-        AttackStart = false;
+            AttackStart = true;
+            yield return new WaitForSeconds(0.2f);
+            AttackStart = false;
+
     }
     IEnumerator PlaceHolder()
     {
@@ -103,7 +97,7 @@ public class BodyTarget : MonoBehaviour
                 GameObject.Find("Slash").GetComponent<AudioSource>().Play();
                 enemy.gameObject.GetComponent<EnemyBehaviour>().HealthGo(DamageRange.x * DamageEnchance);
                 enemy.gameObject.GetComponent<EnemyBehaviour>().OnAttack();
-                TimeScaler(0.04f, 0.1f);
+                TimeScaler(0.01f, 0.2f);
             }
             if (a >= enemyList.Count)
             {
@@ -124,16 +118,9 @@ public class BodyTarget : MonoBehaviour
         Time.timeScale = 1;
         Time.fixedDeltaTime = Time.timeScale * 0.02f;
     }
-    IEnumerator EndFrame()
+    IEnumerator WaitStab()
     {
-        yield return new WaitForEndOfFrame();
-        DamageRange = new Vector2(0, 0);
-    }
-    void Allah()
-    {
-        foreach (GameObject emine in enemyList)
-        {
-        }
-
+        yield return new WaitForSeconds(4);
+        HavenTsTabbed = true;
     }
 }

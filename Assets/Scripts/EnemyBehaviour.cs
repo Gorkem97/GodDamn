@@ -7,20 +7,21 @@ using UnityEngine.AI;
 public class EnemyBehaviour : MonoBehaviour
 {
     public Transform Player;
-    Transform StartTransform;
+    public Transform StartTransform;
     public GameObject bit;
+    public GameObject EnemyUI;
     public float goBac = 100;
     public float EnemyCurrentHealth;
     public float EnemyMaxHealth = 100;
-    public bool yokosunmu = false;
     public GameObject HealthBar;
     Animator EnemyAnimation;
-    Rigidbody rb;
     Vector3 drag;
 
     public bool StateFollow = false;
     public bool run = false;
     NavMeshAgent EnemyAgent;
+    [SerializeField]
+    int sagSol = 0;
     
 
     public bool bekle =false;
@@ -33,29 +34,35 @@ public class EnemyBehaviour : MonoBehaviour
     {
         EnemyAnimation = GetComponent<Animator>();
         EnemyCurrentHealth = EnemyMaxHealth;
-        rb = this.gameObject.GetComponent<Rigidbody>();
     }
     void Update()
     {
-        if (yokosunmu)
+        if (Player.position.x < transform.position.x)
         {
-            StartCoroutine(Destiny());
+            sagSol = 2;
         }
-        HealthBar.transform.rotation = Quaternion.LookRotation(Camera.main.transform.position);
+        if (Player.position.x > transform.position.x)
+        {
+            sagSol = 1;
+        }
+
+        EnemyUI.transform.rotation = Quaternion.Euler(0.0f, 0.0f, gameObject.transform.rotation.z * -1.0f);
         HealthBar.GetComponent<Slider>().value = EnemyCurrentHealth / EnemyMaxHealth;
         if (StateFollow)
         {
             EnemyAnimation.SetBool("run", true);
-            if (!this.EnemyAnimation.GetCurrentAnimatorStateInfo(0).IsName("cut"))
+            if (this.EnemyAnimation.GetCurrentAnimatorStateInfo(0).IsName("Great Sword Run"))
             {
                 if (Player.position.x < transform.position.x)
                 {
+                    sagSol = 2;
                     drag = new Vector3(-90, 0, 0).normalized;
                     Quaternion rotation = Quaternion.LookRotation(drag);
                     transform.rotation = rotation;
                 }
                 if (Player.position.x > transform.position.x)
                 {
+                    sagSol = 1;
                     drag = new Vector3(90, 0, 0).normalized;
                     Quaternion rotation = Quaternion.LookRotation(drag);
                     transform.rotation = rotation;
@@ -87,8 +94,9 @@ public class EnemyBehaviour : MonoBehaviour
             HealthBar.GetComponent<Slider>().value = 0;
             GameObject.Find("ALLAH").GetComponent<fÝNDaNDtERMÝNATE>().TheOne = GameObject.Find("ALLAH");
             GameObject.Find("AttackAndCam").GetComponent<BodyTarget>().enemyList.Remove(this.gameObject);
-            Player.GetComponent<walk>().TakeDamage(-70);
-            Destroy(this.gameObject);
+            Player.GetComponent<walk>().ParyEnemy = Player.gameObject;
+            Player.GetComponent<walk>().onEnemy = false;
+            this.gameObject.SetActive(false);
         }
         else
         {
@@ -97,12 +105,22 @@ public class EnemyBehaviour : MonoBehaviour
     }
     public void OnAttack()
     {
-        //rb.AddForce(-transform.forward*goBac);
-        transform.position = transform.position + transform.forward*-2f;
+        if (!this.EnemyAnimation.GetCurrentAnimatorStateInfo(0).IsName("cut") || !this.EnemyAnimation.GetCurrentAnimatorStateInfo(0).IsName("Sword And Shield Impact") || !this.EnemyAnimation.GetCurrentAnimatorStateInfo(0).IsName("Parried"))
+        {
+            if (sagSol == 1)
+            {
+                transform.position = transform.position + Vector3.left * 2f;
+            }
+            if (sagSol == 2)
+            {
+                transform.position = transform.position + Vector3.right * 2f;
+            }
+        }
     }
     public void HealthGo(float range)
     {
         EnemyCurrentHealth -= range;
+        CameraShake.Instance.ShakeCamera(2, 0.7f);
         EnemyAnimation.SetTrigger("OuchStand");
         StateFollow = true;
     }
@@ -118,11 +136,36 @@ public class EnemyBehaviour : MonoBehaviour
         if (Mathf.Abs(Player.position.x - transform.position.x) < 3)
         {
             Player.GetComponent<walk>().TakeDamage(30);
+            if (Player.GetComponent<walk>().isParry)
+            {
+                EnemyAnimation.SetBool("Parried",true);
+                StartCoroutine(parryWait());
+                Player.GetComponent<walk>().parriedObject(this.gameObject);
+            }
         }
     }
-    IEnumerator Destiny()
+    public void Restart()
     {
-        yield return new WaitForSeconds(0.1f);
-        Destroy(this.gameObject);
+        EnemyCurrentHealth = EnemyMaxHealth;
+        EnemyAgent.enabled = !EnemyAgent.enabled;
+        transform.position = StartTransform.position;
+        EnemyAgent.enabled = !EnemyAgent.enabled;
+        StateFollow = false;
+    }
+    public void FootStep()
+    {
+        GameObject.Find("Step").GetComponent<AudioSource>().Play();
+    }
+    IEnumerator parryWait()
+    {
+        StateFollow = false;
+        yield return new WaitForSeconds(4);
+        StateFollow = true;
+        StateFollow = true;
+        EnemyAnimation.SetBool("Parried", false);
+        walk annen = Player.GetComponent<walk>();
+        annen.onEnemy = false;
+        annen.haveparried = false;
+        annen.ParyEnemy = Player.gameObject;
     }
 }

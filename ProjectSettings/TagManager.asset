@@ -7,6 +7,8 @@ TagManager:
   - Enemy
   - Ground
   - Light
+  - PlayerCollider
+  - CannonBall
   layers:
   - Default
   - TransparentFX
