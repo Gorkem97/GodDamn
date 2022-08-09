@@ -40,7 +40,6 @@ public class SpecialEnemyThings : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        Debug.DrawLine(transform.position, transform.forward);
         StateFollow = !enemyComponent.shouldWait;
         if (StateFollow)
         {

@@ -8,7 +8,7 @@ public class walk : MonoBehaviour
 {
 
 
-    CharacterController controller;
+    Rigidbody PlayerRb;
     public float Health = 100;
     public float MaxHealth = 100;
 
@@ -19,19 +19,21 @@ public class walk : MonoBehaviour
 
 
     [Header("Gravity and Jump")]
-    public float GravityScale = 0.1f;
-    public float GravityHolder;
-    bool GravityPull = true;
-    public float GravitationalSpeed = 5;
     public float JumpForce = 10;
-    bool isWalking;
-    float raycastDistance = 0.08f;
+    public bool isWalking;
+    bool GravityPull;
+    public float raycastDistance = 0.2f;
     bool waitingJump;
     int jumpWait =0;
     [Space(5)]
 
     [Header("CharacterMovement")]
     public float speed;
+    public float acceleration;
+    public float decceleration;
+    public float velPower;
+    bool Cayeote = false;
+    int allah = 0;
     float OriginalSpeed;
     public float smoothness = 60f;
     public float turnSmoothTime = 0.1f;
@@ -89,7 +91,6 @@ public class walk : MonoBehaviour
             enemies.Add(item);
         }
         BeforeTransform = transform.position;
-        GravityHolder = GravityScale;
         CharacterAnimator = this.gameObject.GetComponent<Animator>();
         SlideIgnore = GameObject.Find("EmptyCollider");
         ParyParticle = GameObject.Find("ParryParticle");
@@ -99,12 +100,13 @@ public class walk : MonoBehaviour
     private void Awake()
     {
         playerControls = new PlayerCommands();
-        controller = this.gameObject.GetComponent<CharacterController>();
+        PlayerRb = this.gameObject.GetComponent<Rigidbody>();
         StartCoroutine(IdleController());
     }
 
     void Update()
     {
+
         if (!ParyParticle.GetComponent<ParticleSystem>().IsAlive())
         {
             ParyParticle.transform.position = transform.position + transform.forward + new Vector3(0, 1.6f, 0);
@@ -142,11 +144,9 @@ public class walk : MonoBehaviour
         }
         if (Health<=0)
         {
-            Health = 100;
+            Health = MaxHealth;
             GameObject.Find("HealthBar").GetComponent<Slider>().value = 0;
-            controller.enabled = !controller.enabled;
             this.gameObject.transform.position = BeforeTransform;
-            controller.enabled = !controller.enabled;
             foreach (GameObject item in enemies)
             {
                 item.SetActive(true);
@@ -156,69 +156,112 @@ public class walk : MonoBehaviour
         {
             GameObject.Find("HealthBar").GetComponent<Slider>().value = Health / MaxHealth;
         }
-        if (GravitationalSpeed>=0 && GravityPull)
+        if (PlayerRb.velocity.y<=0 && GravityPull)
         {
-            GravityScale = GravityScale*16/10;
+            StopUpwards();
             GravityPull = false;
         }
-
-
         RaycastHit hit;
         Ray GroundLay = new Ray(transform.position, Vector3.down);
-        GravitationalSpeed += GravityScale;
         if (Physics.Raycast(GroundLay, out hit, raycastDistance))
         {
             if (hit.collider.tag == "Ground" && !waitingJump)
             {
+                Physics.gravity = new Vector3(0, -20F, 0);
                 jumpWait = 0;
                 isWalking = true;
                 GravityPull = true;
                 CharacterAnimator.SetBool("yerdemi", true);
-                GravitationalSpeed = 0.2f;
-                GravityScale = GravityHolder;
             }
         }
         else
         {
             jumpWait += 1;
-            if (jumpWait>=10)
+            if (jumpWait>= 10)
             {
                 isWalking = false;
                 CharacterAnimator.SetBool("yerdemi", false);
             }
         }
     }
-    private void OnControllerColliderHit(ControllerColliderHit hit)
+    
+    private void OnCollisionStay(Collision collision)
     {
-        if (hit.gameObject.tag == "Enemy")
+        if (collision.gameObject.tag == "Enemy")
         {
             if (rolling)
             {
-                SlideIgnore = hit.gameObject;
+                SlideIgnore = collision.gameObject;
                 Physics.IgnoreCollision(SlideIgnore.GetComponent<Collider>(), GetComponent<Collider>());
             }
         }
-        if (hit.gameObject.tag == "Light")
-        {
-            Health += 9;
-        }
-        if (hit.gameObject == ParyEnemy)
+        if (collision.gameObject == ParyEnemy)
         {
             onEnemy = true;
         }
+
     }
-    
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "CannonBall")
+        {
+            TakeDamage(40);
+        }
+    }
+    private void OnTriggerStay(Collider other)
+    {
+
+        if (other.gameObject.tag == "Light")
+        {
+            Health += 60 * Time.deltaTime;
+            BeforeTransform = transform.position;
+        }
+        if (other.gameObject.name == "PlayerDetection")
+        {
+            other.gameObject.GetComponentInParent<EnemyBehaviour>().shouldWait = false;
+        }
+    }
     private void FixedUpdate()
     {
+        if (Cayeote && isWalking)
+        {
+            Cayeote = false;
+            CharacterAnimator.SetTrigger("jump");
+            GameObject.Find("Jump").GetComponent<AudioSource>().Play();
+            CharacterAnimator.SetBool("yerdemi", false);
+            PlayerRb.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
+        }
         Health -= 12 * Time.fixedDeltaTime;
         if (hareketmi)
         {
             moveDirection = move.ReadValue<Vector2>();
-            walkRoute = new Vector3(moveDirection.x, 0, 0);
+            if (moveDirection.x>0)
+            {
+                allah = 1;
+            }
+            if (moveDirection.x < 0)
+            {
+                allah = -1;
+            }
+            if (moveDirection.x > 0)
+            {
+                allah = 1;
+            }
+            if (moveDirection.x == 0)
+            {
+                allah = 0;
+            }
+            walkRoute = new Vector3(allah, 0);
             Vector3 direction = walkRoute.normalized;
+
+            float targetSpeed = allah * speed;
+            float speedDif = targetSpeed - PlayerRb.velocity.x;
+            float accelRate = (Mathf.Abs(targetSpeed) > 0.1) ? acceleration : decceleration;
+            float movement = Mathf.Pow(Mathf.Abs(speedDif) * accelRate, velPower) * Mathf.Sign(speedDif);
+            PlayerRb.AddForce(movement * Vector3.right);
             if (direction.magnitude > 0)
             {
-                controller.Move(walkRoute * speed * Time.fixedDeltaTime);
                 AmIwalking = true;
                 float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
                 float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
@@ -233,12 +276,11 @@ public class walk : MonoBehaviour
         }
         if (rolling)
         {
-            controller.Move(transform.forward * rollSpeed * Time.fixedDeltaTime);
+            PlayerRb.MovePosition(transform.position + transform.forward * Time.deltaTime * rollSpeed);
         }
-        controller.Move(new Vector3(0, -1, 0) * GravitationalSpeed * Time.fixedDeltaTime);
         if (attackGo)
         {
-            controller.Move(transform.forward * speed * Time.fixedDeltaTime);
+            PlayerRb.MovePosition(transform.position + transform.forward * Time.deltaTime * speed);
             CharacterAnimator.SetBool("yuruyormu", true);
         }
     }
@@ -260,7 +302,8 @@ public class walk : MonoBehaviour
         fire.performed += Fire;
         jump = playerControls.Player.Jump;
         jump.Enable();
-        jump.performed += Jump;
+        jump.started += Jump;
+        jump.canceled += JumpEnd;
         slide = playerControls.Player.Slide;
         slide.Enable();
         slide.performed += Slide;
@@ -271,7 +314,6 @@ public class walk : MonoBehaviour
     }
     private void OnDisable()
     {
-        move = playerControls.Player.Move;
         move.Disable();
         fire.Disable();
         jump.Disable();
@@ -283,14 +325,24 @@ public class walk : MonoBehaviour
     }
     private void Jump(InputAction.CallbackContext context)
     {
-        if (isWalking )
+        StartCoroutine(JumpCheck());
+    }
+    private void JumpEnd(InputAction.CallbackContext context)
+    {
+        if (!isWalking)
         {
-            CharacterAnimator.SetTrigger("jump");
-            GameObject.Find("Jump").GetComponent<AudioSource>().Play();
-            CharacterAnimator.SetBool("yerdemi", false);
-            GravitationalSpeed = -JumpForce;
-            controller.Move(new Vector3(0, 1, 0) * 0.3f);        
+            StopUpwards();
         }
+    }
+    private void StopUpwards()
+    {
+        Physics.gravity = new Vector3(0, -40F, 0);
+    }
+    IEnumerator JumpCheck()
+    {
+        Cayeote = true;
+        yield return new WaitForSeconds(0.2f);
+        Cayeote = false;
     }
     private void Slide(InputAction.CallbackContext context)
     {
@@ -320,8 +372,11 @@ public class walk : MonoBehaviour
         CharacterAnimator.SetBool("roll", false);
         yield return new WaitForSeconds(0.4f);
         rolling = false;
-        Physics.IgnoreCollision(SlideIgnore.GetComponent<Collider>(), GetComponent<Collider>(), false);
         transform.rotation = rotationknow;
+        if (SlideIgnore)
+        {
+            Physics.IgnoreCollision(SlideIgnore.GetComponent<Collider>(), GetComponent<Collider>(), false);
+        }
     }
     public void AttackDamage(float a)
     {
@@ -399,7 +454,10 @@ public class walk : MonoBehaviour
     }
     public void FootStep()
     {
-        GameObject.Find("Step").GetComponent<AudioSource>().Play();
+        if (isWalking)
+        {
+            GameObject.Find("Step").GetComponent<AudioSource>().Play();
+        }
     }
     public void ShouldLeap()
     {

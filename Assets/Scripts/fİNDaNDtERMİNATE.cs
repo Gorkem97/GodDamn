@@ -21,7 +21,7 @@ public class fİNDaNDtERMİNATE : MonoBehaviour
 
     void Update()
     {
-        target.transform.position = new Vector3(TheOne.transform.position.x, TheOne.transform.position.y + 1.6f, TheOne.transform.position.z);
+        target.transform.position = new Vector3(TheOne.transform.position.x, TheOne.transform.position.y + 1.3f, TheOne.transform.position.z);
     }
     private void OnTriggerStay(Collider other)
     {

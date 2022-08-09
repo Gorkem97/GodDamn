@@ -42,7 +42,7 @@ public class SkyBoxer : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "PlayerCollider")
+        if (other.tag == "Player")
         {
             SkyChange(1);
         }
