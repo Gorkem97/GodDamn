@@ -20,11 +20,12 @@ public class EnemyBehaviour : MonoBehaviour
     public bool parriable;
     public float ParryBar;
     public float parryValue;
-
+    Rigidbody rb;
 
     public bool bekle =false;
     void Start()
     {
+        rb = GetComponent<Rigidbody>();
         EnemyAnimation = GetComponent<Animator>();
         EnemyCurrentHealth = EnemyMaxHealth;
     }
@@ -61,15 +62,19 @@ public class EnemyBehaviour : MonoBehaviour
     }
     public void OnAttack()
     {
-        if (!this.EnemyAnimation.GetCurrentAnimatorStateInfo(0).IsName("cut") || !this.EnemyAnimation.GetCurrentAnimatorStateInfo(0).IsName("Sword And Shield Impact") || !this.EnemyAnimation.GetCurrentAnimatorStateInfo(0).IsName("Parried"))
+        if (this.EnemyAnimation.GetCurrentAnimatorStateInfo(0).IsName("cut")  || !this.EnemyAnimation.GetCurrentAnimatorStateInfo(0).IsName("Parried"))
         {
             if (sagSol == 1)
             {
-                transform.position = transform.position + Vector3.left * 2f;
+                rb.AddForce(transform.position + Vector3.left * goBac, ForceMode.Impulse);
+                //rb.MovePosition(transform.position + Vector3.left * 2f);
+                //transform.position = transform.position + Vector3.left * 2f;
             }
             if (sagSol == 2)
             {
-                transform.position = transform.position + Vector3.right * 2f;
+                rb.AddForce(transform.position + Vector3.right * goBac, ForceMode.Impulse);
+                //rb.MovePosition(transform.position + Vector3.right * 2f);
+                //transform.position = transform.position + Vector3.right * 2f;
             }
         }
     }
