@@ -134,14 +134,6 @@ public class walk : MonoBehaviour
             atakCizgi.SetActive(true);
             CharacterAnimator.SetLayerWeight(1, 1);
         }
-        if (CharacterAnimator.GetCurrentAnimatorStateInfo(2).IsName("emptyLegs"))
-        {
-            CharacterAnimator.SetLayerWeight(2, 0);
-        }
-        if (!CharacterAnimator.GetCurrentAnimatorStateInfo(2).IsName("emptyLegs"))
-        {
-            CharacterAnimator.SetLayerWeight(2, 1);
-        }
 
         if (Health > MaxHealth)
         {
@@ -158,7 +150,6 @@ public class walk : MonoBehaviour
             foreach (GameObject item in enemies)
             {
                 item.SetActive(true);
-                item.GetComponent<EnemyBehaviour>().Restart();
             }
         }
         else
@@ -167,7 +158,7 @@ public class walk : MonoBehaviour
         }
         if (GravitationalSpeed>=0 && GravityPull)
         {
-            GravityScale = GravityScale*9/10;
+            GravityScale = GravityScale*16/10;
             GravityPull = false;
         }
 
