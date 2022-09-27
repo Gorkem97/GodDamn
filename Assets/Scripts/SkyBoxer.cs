@@ -9,6 +9,7 @@ public class SkyBoxer : MonoBehaviour
     public Material SkyBoxTwo;
     public Material SkyBoxThree;
     public int crisp = 1;
+    public int TriggerChange = 1;
     void Start()
     {
         if (crisp == 1)
@@ -44,7 +45,9 @@ public class SkyBoxer : MonoBehaviour
     {
         if (other.tag == "Player")
         {
-            SkyChange(1);
+            SkyChange(TriggerChange);
+            Destroy(gameObject);
         }
+
     }
 }

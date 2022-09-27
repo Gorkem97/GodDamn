@@ -25,6 +25,7 @@ public class EnemyBehaviour : MonoBehaviour
     public bool bekle =false;
     void Start()
     {
+        Player = GameObject.Find("Player").transform;
         rb = GetComponent<Rigidbody>();
         EnemyAnimation = GetComponent<Animator>();
         EnemyCurrentHealth = EnemyMaxHealth;
@@ -49,11 +50,20 @@ public class EnemyBehaviour : MonoBehaviour
         if (EnemyCurrentHealth<=0)
         {
             HealthBar.GetComponent<Slider>().value = 0;
+            HealthBar.SetActive(false);
             GameObject.Find("ALLAH").GetComponent<fÝNDaNDtERMÝNATE>().TheOne = GameObject.Find("ALLAH");
             GameObject.Find("AttackAndCam").GetComponent<BodyTarget>().enemyList.Remove(this.gameObject);
             Player.GetComponent<walk>().ParyEnemy = Player.gameObject;
             Player.GetComponent<walk>().onEnemy = false;
-            this.gameObject.SetActive(false);
+            EnemyAnimation.SetTrigger("death");
+            if (sagSol == 1)
+            {
+                rb.AddForce(transform.position + Vector3.left * goBac, ForceMode.Impulse);
+            }
+            if (sagSol == 2)
+            {
+                rb.AddForce(transform.position + Vector3.right * goBac , ForceMode.Impulse);
+            }
         }
         else
         {
@@ -62,17 +72,24 @@ public class EnemyBehaviour : MonoBehaviour
     }
     public void OnAttack()
     {
-        if (this.EnemyAnimation.GetCurrentAnimatorStateInfo(0).IsName("cut")  || !this.EnemyAnimation.GetCurrentAnimatorStateInfo(0).IsName("Parried"))
+        if (!this.EnemyAnimation.GetCurrentAnimatorStateInfo(0).IsName("Parried"))
         {
             if (sagSol == 1)
             {
-                rb.AddForce(transform.position + Vector3.left * goBac, ForceMode.Impulse);
+                if (EnemyCurrentHealth>0)
+                {
+                    rb.AddForce(transform.position + Vector3.left * goBac, ForceMode.Impulse);
+                }
                 //rb.MovePosition(transform.position + Vector3.left * 2f);
                 //transform.position = transform.position + Vector3.left * 2f;
             }
             if (sagSol == 2)
             {
-                rb.AddForce(transform.position + Vector3.right * goBac, ForceMode.Impulse);
+                if (EnemyCurrentHealth > 0)
+                {
+                    rb.AddForce(transform.position + Vector3.right * goBac, ForceMode.Impulse);
+                }
+                //rb.AddForce(transform.position + Vector3.right * goBac, ForceMode.Impulse);
                 //rb.MovePosition(transform.position + Vector3.right * 2f);
                 //transform.position = transform.position + Vector3.right * 2f;
             }
@@ -117,5 +134,13 @@ public class EnemyBehaviour : MonoBehaviour
         annen.onEnemy = false;
         annen.haveparried = false;
         annen.ParyEnemy = Player.gameObject;
+    }
+    public void setFalse()
+    {
+        this.gameObject.SetActive(false);
+    }
+    public void deathSituations()
+    {
+        Physics.IgnoreCollision(Player.GetComponent<Collider>(), GetComponent<Collider>());
     }
 }

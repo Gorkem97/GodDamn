@@ -6,8 +6,7 @@ using UnityEngine.InputSystem;
 
 public class walk : MonoBehaviour
 {
-
-
+    public GameObject speedEffect;
     Rigidbody PlayerRb;
     public float Health = 100;
     public float MaxHealth = 100;
@@ -29,10 +28,11 @@ public class walk : MonoBehaviour
 
     [Header("CharacterMovement")]
     public float speed;
+    float StartSpeed;
     public float acceleration;
     public float decceleration;
     public float velPower;
-    bool Cayeote = false;
+    public bool Cayeote = false;
     int allah = 0;
     float OriginalSpeed;
     public float smoothness = 60f;
@@ -81,11 +81,13 @@ public class walk : MonoBehaviour
     public bool onEnemy = false;
     [Space(5)]
 
+    public float speedWait = 0;
 
     public GameObject bit;
     Quaternion rotationknow;
     void Start()
     {
+        StartSpeed = speed;
         foreach (GameObject item in GameObject.FindGameObjectsWithTag("Enemy"))
         {
             enemies.Add(item);
@@ -96,6 +98,8 @@ public class walk : MonoBehaviour
         ParyParticle = GameObject.Find("ParryParticle");
         ParryLit = ParyParticle.transform.GetChild(0);
         OriginalSpeed = speed;
+        Debug.Log(transform.forward);
+        Debug.Log(Vector3.right);
     }
     private void Awake()
     {
@@ -106,7 +110,6 @@ public class walk : MonoBehaviour
 
     void Update()
     {
-
         if (!ParyParticle.GetComponent<ParticleSystem>().IsAlive())
         {
             ParyParticle.transform.position = transform.position + transform.forward + new Vector3(0, 1.6f, 0);
@@ -176,13 +179,11 @@ public class walk : MonoBehaviour
         }
         else
         {
-            jumpWait += 1;
-            if (jumpWait>= 10)
-            {
                 isWalking = false;
                 CharacterAnimator.SetBool("yerdemi", false);
-            }
         }
+
+
     }
     
     private void OnCollisionStay(Collision collision)
@@ -226,31 +227,70 @@ public class walk : MonoBehaviour
     {
         if (Cayeote && isWalking)
         {
-            Cayeote = false;
             CharacterAnimator.SetTrigger("jump");
             GameObject.Find("Jump").GetComponent<AudioSource>().Play();
             CharacterAnimator.SetBool("yerdemi", false);
             PlayerRb.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
+            //Cayeote = false;
         }
         Health -= 12 * Time.fixedDeltaTime;
         if (hareketmi)
         {
+            int b = allah;
             moveDirection = move.ReadValue<Vector2>();
             if (moveDirection.x>0)
             {
                 allah = 1;
+                if (transform.forward == Vector3.left)
+                {
+                    Quaternion rotation = Quaternion.LookRotation(new Vector3(90, 0, 0).normalized);
+                    transform.rotation = rotation;
+                }
             }
             if (moveDirection.x < 0)
             {
                 allah = -1;
+                if (transform.forward == Vector3.right)
+                {
+                    Quaternion rotation = Quaternion.LookRotation(new Vector3(-90, 0, 0).normalized);
+                    transform.rotation = rotation;
+                }
             }
-            if (moveDirection.x > 0)
+
+
+            if (moveDirection.x >= 0.8f)
             {
-                allah = 1;
+                speedWait += 1*Time.fixedDeltaTime;
             }
+            if (moveDirection.x <= -0.8f)
+            {
+                speedWait += 1 * Time.fixedDeltaTime;
+            }
+            if(moveDirection.x > -0.8f && moveDirection.x < 0.8f)
+            {
+                speedWait = 0;
+            }
+
+            if (speedWait>7)
+            {
+                speedEffect.SetActive(true);
+                speed = 1.3f*StartSpeed;
+                CharacterAnimator.speed = 1.3f;
+            }
+            else
+            {
+                speedEffect.SetActive(false);
+                speed = StartSpeed;
+                CharacterAnimator.speed = 1f;
+            }
+
             if (moveDirection.x == 0)
             {
                 allah = 0;
+            }
+            if (Mathf.Abs(b) - Mathf.Abs(allah) == 2)
+            {
+                CharacterAnimator.SetTrigger("turn");
             }
             walkRoute = new Vector3(allah, 0);
             Vector3 direction = walkRoute.normalized;
@@ -263,9 +303,11 @@ public class walk : MonoBehaviour
             if (direction.magnitude > 0)
             {
                 AmIwalking = true;
+                /*
                 float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
                 float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
                 transform.rotation = Quaternion.Euler(0, angle, 0);
+                */
                 CharacterAnimator.SetBool("yuruyormu", true);
             }
             if (direction.magnitude == 0)
@@ -341,7 +383,7 @@ public class walk : MonoBehaviour
     IEnumerator JumpCheck()
     {
         Cayeote = true;
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.3f);
         Cayeote = false;
     }
     private void Slide(InputAction.CallbackContext context)
@@ -393,6 +435,7 @@ public class walk : MonoBehaviour
         {
             if (!isParry)
             {
+                speedWait = 0;
                 if (!isBlocking)
                 {
                     Health -= Nooo;

@@ -30,6 +30,7 @@ public class SpecialEnemyThings : MonoBehaviour
     }
     void Start()
     {
+        Player = GameObject.Find("Player").transform;
         enemyComponent = GetComponent<EnemyBehaviour>();
         EnemyAnimation = GetComponent<Animator>();
     }
